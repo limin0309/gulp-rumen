@@ -12,7 +12,7 @@ const del = require('del');
 gulp.task('sass', function() {
     return gulp.src('app/scss/**/*.scss') // Gets all files ending with .scss in app/scss
         .pipe(sass())
-        .pipe(gulp.dest('app/css'))
+        .pipe(gulp.dest('dist/css'))
         .pipe(browserSync.reload({
             stream: true
         }))
@@ -20,8 +20,8 @@ gulp.task('sass', function() {
 gulp.task('watch', ['browserSync', 'sass'], function (){
     gulp.watch('app/scss/**/*.scss', ['sass']);
     // Reloads the browser whenever HTML or JS files change
-    gulp.watch('app/*.html', browserSync.reload);
-    gulp.watch('app/js/**/*.js', browserSync.reload);
+    gulp.watch('app/!*.html', browserSync.reload);
+    gulp.watch('app/js/!**!/!*.js', browserSync.reload);
 });
 gulp.task('browserSync', function() {
     browserSync({
@@ -30,8 +30,8 @@ gulp.task('browserSync', function() {
         },
     })
 });
-gulp.task('useref', function(){
-    return gulp.src('app/*.html')
+gulp.task('useref', function(){ // gulp-useref会将多个文件拼接成单一文件，并输出到相应目录。
+    return gulp.src('app/!*.html')
     // Minifies only if it's a CSS file
         .pipe(gulpIf('*.css', minifyCSS()))
         // Uglifies only if it's a Javascript file
@@ -40,7 +40,7 @@ gulp.task('useref', function(){
         .pipe(gulp.dest('dist'))
 });
 gulp.task('images', function(){
-    return gulp.src('app/images/**/*.+(png|jpg|jpeg|gif|svg)')
+    return gulp.src('app/images/!**!/!*.+(png|jpg|jpeg|gif|svg)')
     // Caching images that ran through imagemin
         .pipe(cache(imagemin({
             interlaced: true
@@ -52,7 +52,7 @@ gulp.task('clean', function(callback) {
     return cache.clearAll(callback);
 });
 gulp.task('clean:dist', function(callback){
-    del(['dist/**/*', '!dist/images', '!dist/images/**/*'], callback)
+    del(['dist/!**!/!*', '!dist/images', '!dist/images/!**/!*'], callback)
 });
 gulp.task('build', [`clean`, `sass`, `useref`, `images`, `fonts`], function (){
     console.log('Building files');
